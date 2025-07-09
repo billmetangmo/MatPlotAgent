@@ -4,6 +4,35 @@
 
 **MatPlotAgent** est un framework d'agent LLM conçu pour automatiser les tâches de visualisation de données scientifiques. **MatPlotBench** est un benchmark de 100 cas de test pour évaluer les approches de visualisation de données.
 
+## ⚠️ Usage Benchmark vs Usage Réel - IMPORTANT
+
+### Dans le Benchmark (ce qu'on voit dans le code) :
+```python
+# Usage BENCHMARK - pour tester les performances
+mainworkflow(expert_instruction, simple_instruction, workspace=directory_path)
+```
+
+### En Usage Réel (pour un utilisateur normal) :
+```python
+# Usage RÉEL - l'utilisateur ne fournit que sa demande
+user_request = "Create a scatter plot with correlation data"
+query_expansion_agent = QueryExpansionAgent("", user_request, model_type='gpt-4')
+expanded_instruction = query_expansion_agent.run('simple')
+```
+
+**Non, un utilisateur normal n'a PAS besoin de fournir expert_instruction !**
+
+### Pourquoi cette confusion ?
+
+Le code actuel est principalement **orienté recherche/benchmark**, donc tous les scripts utilisent les deux instructions pour comparer les performances. Mais le système `QueryExpansionAgent` utilise en fait un **prompt générique** qui améliore automatiquement n'importe quelle instruction utilisateur :
+
+```python
+# Le prompt système de QueryExpansionAgent
+SYSTEM_PROMPT = '''According to the user query, expand and solidify the query into a step by step detailed instruction on how to write python code to fulfill the user query's requirements.'''
+```
+
+Il n'a pas besoin d'instructions expertes pré-écrites !
+
 ## Qu'est-ce que `expert_instruction` et `simple_instruction` ?
 
 Dans le benchmark MatPlotBench, ces deux types d'instructions font partie d'une stratégie comparative qui évalue l'efficacité des LLMs avec différents niveaux de détail :
@@ -120,3 +149,24 @@ Le benchmark prouve que MatPlotAgent transforme efficacement les `simple_instruc
 - **+9.48 points** pour GPT-3.5
 
 Cela valide l'approche du framework pour combler le gap entre les instructions utilisateur naturelles et la génération de code de visualisation de qualité professionnelle.
+
+## 🎯 Pour l'utilisateur final - Usage Pratique
+
+### Ce que vous devez retenir :
+
+1. **Usage normal** : Vous donnez juste votre demande en langage naturel
+   ```python
+   "Create a histogram of my sales data with error bars"
+   ```
+
+2. **Le système s'occupe du reste** : MatPlotAgent améliore automatiquement votre demande grâce à :
+   - Son agent d'expansion de requêtes (QueryExpansionAgent)  
+   - Son agent de génération de code (PlotAgent)
+   - Son agent de raffinement visuel (VisualRefineAgent)
+
+3. **Pas besoin d'instructions techniques** : Le framework transforme votre langage naturel en instructions techniques automatiquement
+
+4. **Dans le benchmark** : Les deux types d'instructions servent à mesurer les performances, pas à définir l'usage normal
+
+### Résumé :
+**MatPlotAgent = Interface simple pour l'utilisateur + Intelligence technique en arrière-plan**
